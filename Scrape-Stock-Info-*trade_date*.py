@@ -5,16 +5,17 @@ import pandas as pd
 
 def downLoadData(pro):
 
-    start_date = "2019-04-28"
+    start_date = "2019-01-09"
     end_date="2023-01-09"
 
     conn = sqlite3.connect("New_Stk_hist.sqlite")
     cursor = conn.cursor()
 
     #Stock History Table
-    stk_hist = pd.DataFrame()
-    date_range = pd.date_range(start=start_date, end=end_date)
+    df_daily_basic = pd.DataFrame()
+    df_daily = pd.DataFrame()
     #Iterate through a daterange
+    date_range = pd.date_range(start=start_date, end=end_date)
     for date in tqdm(date_range):
         date= date.strftime('%Y%m%d')
         #API 1
@@ -22,10 +23,11 @@ def downLoadData(pro):
         #API2
         daily_basic = pro.daily_basic(trade_date = date)[['ts_code','trade_date','turnover_rate','total_mv']]
         #Merge dataframes from different APIs
-        df_new = daily_basic.merge(daily[['ts_code','trade_date','pct_chg']])
+        df_daily = pd.concat([df_daily,daily])
         #Concat the new dataframe
-        stk_hist = pd.concat([stk_hist,df_new])
+        df_daily_basic = pd.concat([df_daily_basic,daily_basic])
         print("Scaped Stock Info on:",date)
+    stk_hist = pd.merge(df_daily,df_daily_basic,on=['ts_code','trade_date'])
     stk_hist.to_sql(name='Stk_hist', con=conn,if_exists="replace",index=False)
     print("Successfully saved data into SOL table: Stk_hist")
 
