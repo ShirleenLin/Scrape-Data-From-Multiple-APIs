@@ -20,6 +20,7 @@ def downLoadData(pro):
         date= date.strftime('%Y%m%d')
         #API 1
         daily = pro.daily(trade_date = date)[['ts_code','trade_date','pct_chg']]  #If the date is not a trade_date, it doesn't return
+        #
         daily_basic = pro.daily_basic(trade_date = date)[['ts_code','trade_date','turnover_rate','total_mv']]
         #Merge dataframes from different APIs
         df_daily = pd.concat([df_daily,daily])
